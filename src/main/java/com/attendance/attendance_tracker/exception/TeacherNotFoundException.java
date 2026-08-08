@@ -1,6 +1,6 @@
 package com.attendance.attendance_tracker.exception;
 
-public class TeacherNotFoundException extends RuntimeException {
+public class TeacherNotFoundException extends ResourceNotFoundException {
 
     public TeacherNotFoundException(String message) {
         super(message);

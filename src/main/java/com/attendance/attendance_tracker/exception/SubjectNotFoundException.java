@@ -1,6 +1,6 @@
 package com.attendance.attendance_tracker.exception;
 
-public class SubjectNotFoundException extends RuntimeException {
+public class SubjectNotFoundException extends ResourceNotFoundException {
 
     public SubjectNotFoundException(String message) {
         super(message);
