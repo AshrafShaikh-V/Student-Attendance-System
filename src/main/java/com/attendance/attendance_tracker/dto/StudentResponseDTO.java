@@ -1,0 +1,24 @@
+package com.attendance.attendance_tracker.dto;
+
+import lombok.AllArgsConstructor;
+import lombok.Builder;
+import lombok.Getter;
+import lombok.NoArgsConstructor;
+import lombok.Setter;
+
+@Getter
+@Setter
+@NoArgsConstructor
+@AllArgsConstructor
+@Builder
+public class StudentResponseDTO {
+
+    private Long id;
+    private String rollNumber;
+    private String firstName;
+    private String lastName;
+    private String email;
+    private String department;
+    private Integer year;
+    private String division;
+}
