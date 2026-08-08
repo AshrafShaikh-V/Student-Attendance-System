@@ -50,7 +50,7 @@ public class Student {
     private String department;
 
     @NotNull
-    @Column(nullable = false)
+    @Column(name = "academic_year", nullable = false)
     private Integer year;
 
     @NotBlank
