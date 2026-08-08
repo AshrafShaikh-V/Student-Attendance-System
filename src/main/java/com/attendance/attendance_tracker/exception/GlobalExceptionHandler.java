@@ -34,6 +34,17 @@ public class GlobalExceptionHandler {
         return new ResponseEntity<>(error, HttpStatus.NOT_FOUND);
     }
 
+    @ExceptionHandler(SubjectNotFoundException.class)
+    public ResponseEntity<ErrorResponse> handleSubjectNotFound(SubjectNotFoundException ex) {
+        ErrorResponse error = ErrorResponse.builder()
+                .timestamp(LocalDateTime.now())
+                .status(HttpStatus.NOT_FOUND.value())
+                .error(HttpStatus.NOT_FOUND.getReasonPhrase())
+                .message(ex.getMessage())
+                .build();
+        return new ResponseEntity<>(error, HttpStatus.NOT_FOUND);
+    }
+
     @ExceptionHandler(DuplicateStudentException.class)
     public ResponseEntity<ErrorResponse> handleDuplicateStudent(DuplicateStudentException ex) {
         ErrorResponse error = ErrorResponse.builder()
@@ -47,6 +58,17 @@ public class GlobalExceptionHandler {
 
     @ExceptionHandler(DuplicateTeacherException.class)
     public ResponseEntity<ErrorResponse> handleDuplicateTeacher(DuplicateTeacherException ex) {
+        ErrorResponse error = ErrorResponse.builder()
+                .timestamp(LocalDateTime.now())
+                .status(HttpStatus.CONFLICT.value())
+                .error(HttpStatus.CONFLICT.getReasonPhrase())
+                .message(ex.getMessage())
+                .build();
+        return new ResponseEntity<>(error, HttpStatus.CONFLICT);
+    }
+
+    @ExceptionHandler(DuplicateSubjectException.class)
+    public ResponseEntity<ErrorResponse> handleDuplicateSubject(DuplicateSubjectException ex) {
         ErrorResponse error = ErrorResponse.builder()
                 .timestamp(LocalDateTime.now())
                 .status(HttpStatus.CONFLICT.value())
