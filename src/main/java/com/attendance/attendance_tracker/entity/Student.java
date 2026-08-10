@@ -29,24 +29,24 @@ public class Student {
     private Long id;
 
     @NotBlank
-    @Column(nullable = false, unique = true)
+    @Column(nullable = false, unique = true, length = 20)
     private String rollNumber;
 
     @NotBlank
-    @Column(nullable = false)
+    @Column(nullable = false, length = 50)
     private String firstName;
 
     @NotBlank
-    @Column(nullable = false)
+    @Column(nullable = false, length = 50)
     private String lastName;
 
     @NotBlank
     @Email
-    @Column(nullable = false, unique = true)
+    @Column(nullable = false, unique = true, length = 100)
     private String email;
 
     @NotBlank
-    @Column(nullable = false)
+    @Column(nullable = false, length = 50)
     private String department;
 
     @NotNull
@@ -54,6 +54,6 @@ public class Student {
     private Integer year;
 
     @NotBlank
-    @Column(nullable = false)
+    @Column(nullable = false, length = 10)
     private String division;
 }

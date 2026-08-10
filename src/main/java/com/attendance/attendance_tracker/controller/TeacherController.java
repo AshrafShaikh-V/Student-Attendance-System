@@ -12,7 +12,6 @@ import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
-import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.annotation.RestController;
 
 import com.attendance.attendance_tracker.dto.TeacherRequestDTO;
@@ -30,7 +29,6 @@ public class TeacherController {
     private final TeacherService teacherService;
 
     @PostMapping
-    @ResponseStatus(HttpStatus.CREATED)
     public ResponseEntity<TeacherResponseDTO> createTeacher(@Valid @RequestBody TeacherRequestDTO requestDTO) {
         TeacherResponseDTO createdTeacher = teacherService.createTeacher(requestDTO);
         return new ResponseEntity<>(createdTeacher, HttpStatus.CREATED);
@@ -52,7 +50,6 @@ public class TeacherController {
     }
 
     @DeleteMapping("/{id}")
-    @ResponseStatus(HttpStatus.NO_CONTENT)
     public ResponseEntity<Void> deleteTeacher(@PathVariable Long id) {
         teacherService.deleteTeacher(id);
         return ResponseEntity.noContent().build();

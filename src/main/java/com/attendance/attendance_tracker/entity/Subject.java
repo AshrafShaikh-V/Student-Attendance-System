@@ -28,11 +28,11 @@ public class Subject {
     private Long id;
 
     @NotBlank
-    @Column(nullable = false, unique = true)
+    @Column(nullable = false, unique = true, length = 20)
     private String subjectCode;
 
     @NotBlank
-    @Column(nullable = false)
+    @Column(nullable = false, length = 100)
     private String subjectName;
 
     @NotNull

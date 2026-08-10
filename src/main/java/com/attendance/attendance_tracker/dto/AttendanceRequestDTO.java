@@ -5,6 +5,7 @@ import java.time.LocalDate;
 import com.attendance.attendance_tracker.entity.AttendanceStatus;
 
 import jakarta.validation.constraints.NotNull;
+import jakarta.validation.constraints.PastOrPresent;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Getter;
@@ -25,6 +26,7 @@ public class AttendanceRequestDTO {
     private Long subjectId;
 
     @NotNull(message = "Attendance date is required")
+    @PastOrPresent(message = "Attendance date cannot be in the future")
     private LocalDate attendanceDate;
 
     @NotNull(message = "Attendance status is required")
