@@ -74,10 +74,9 @@ public class StudentService {
 
     @Transactional
     public void deleteStudent(Long id) {
-        if (!studentRepository.existsById(id)) {
-            throw new StudentNotFoundException(id);
-        }
-        studentRepository.deleteById(id);
+        Student student = studentRepository.findById(id)
+                .orElseThrow(() -> new StudentNotFoundException(id));
+        studentRepository.delete(student);
     }
 
     public List<StudentResponseDTO> searchStudents(String query) {

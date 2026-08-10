@@ -21,6 +21,7 @@ import lombok.RequiredArgsConstructor;
 
 @Service
 @RequiredArgsConstructor
+@Transactional(readOnly = true)
 public class AttendanceService {
 
     private final AttendanceRepository attendanceRepository;
@@ -43,14 +44,13 @@ public class AttendanceService {
         return mapToResponseDTO(saved);
     }
 
-    @Transactional(readOnly = true)
     public List<AttendanceResponseDTO> getAllAttendance() {
-        return attendanceRepository.findAll().stream()
+        // Uses JOIN FETCH to load student and subject in a single query (avoids N+1).
+        return attendanceRepository.findAllWithDetails().stream()
                 .map(this::mapToResponseDTO)
                 .toList();
     }
 
-    @Transactional(readOnly = true)
     public AttendanceResponseDTO getAttendanceById(Long id) {
         Attendance attendance = findAttendanceById(id);
         return mapToResponseDTO(attendance);
@@ -76,10 +76,9 @@ public class AttendanceService {
 
     @Transactional
     public void deleteAttendance(Long id) {
-        if (!attendanceRepository.existsById(id)) {
-            throw new AttendanceNotFoundException(id);
-        }
-        attendanceRepository.deleteById(id);
+        Attendance attendance = attendanceRepository.findById(id)
+                .orElseThrow(() -> new AttendanceNotFoundException(id));
+        attendanceRepository.delete(attendance);
     }
 
     private Student findStudentById(Long id) {

@@ -2,6 +2,7 @@ package com.attendance.attendance_tracker.service;
 
 import java.util.List;
 
+import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -20,6 +21,7 @@ import lombok.RequiredArgsConstructor;
 public class TeacherService {
 
     private final TeacherRepository teacherRepository;
+    private final BCryptPasswordEncoder passwordEncoder;
 
     @Transactional
     public TeacherResponseDTO createTeacher(TeacherRequestDTO requestDTO) {
@@ -57,7 +59,10 @@ public class TeacherService {
         existingTeacher.setFirstName(requestDTO.getFirstName());
         existingTeacher.setLastName(requestDTO.getLastName());
         existingTeacher.setEmail(requestDTO.getEmail());
-        existingTeacher.setPassword(requestDTO.getPassword());
+        // Only re-hash if a new password value is provided.
+        if (requestDTO.getPassword() != null && !requestDTO.getPassword().isBlank()) {
+            existingTeacher.setPassword(passwordEncoder.encode(requestDTO.getPassword()));
+        }
         existingTeacher.setSpecialization(requestDTO.getSpecialization());
 
         Teacher updatedTeacher = teacherRepository.save(existingTeacher);
@@ -66,10 +71,9 @@ public class TeacherService {
 
     @Transactional
     public void deleteTeacher(Long id) {
-        if (!teacherRepository.existsById(id)) {
-            throw new TeacherNotFoundException(id);
-        }
-        teacherRepository.deleteById(id);
+        Teacher teacher = teacherRepository.findById(id)
+                .orElseThrow(() -> new TeacherNotFoundException(id));
+        teacherRepository.delete(teacher);
     }
 
     public List<TeacherResponseDTO> searchTeachers(String query) {
@@ -86,7 +90,7 @@ public class TeacherService {
                 .firstName(dto.getFirstName())
                 .lastName(dto.getLastName())
                 .email(dto.getEmail())
-                .password(dto.getPassword())
+                .password(passwordEncoder.encode(dto.getPassword()))
                 .specialization(dto.getSpecialization())
                 .build();
     }
@@ -99,5 +103,6 @@ public class TeacherService {
                 .email(teacher.getEmail())
                 .specialization(teacher.getSpecialization())
                 .build();
+        // Note: password is intentionally NEVER included in the response DTO.
     }
 }

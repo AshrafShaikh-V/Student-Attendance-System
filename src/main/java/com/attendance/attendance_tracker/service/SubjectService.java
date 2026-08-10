@@ -64,10 +64,9 @@ public class SubjectService {
 
     @Transactional
     public void deleteSubject(Long id) {
-        if (!subjectRepository.existsById(id)) {
-            throw new SubjectNotFoundException(id);
-        }
-        subjectRepository.deleteById(id);
+        Subject subject = subjectRepository.findById(id)
+                .orElseThrow(() -> new SubjectNotFoundException(id));
+        subjectRepository.delete(subject);
     }
 
     public List<SubjectResponseDTO> searchSubjects(String query) {
