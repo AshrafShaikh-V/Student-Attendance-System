@@ -37,6 +37,10 @@ public class AttendanceController {
         return new ResponseEntity<>(response, HttpStatus.CREATED);
     }
 
+    /**
+     * Retrieves attendance records. All filter parameters are optional.
+     * If no query parameters are provided, the endpoint returns all attendance records.
+     */
     @GetMapping
     public ResponseEntity<List<AttendanceResponseDTO>> getAllAttendance(
             @RequestParam(required = false) Long studentId,
