@@ -24,15 +24,11 @@ import com.attendance.attendance_tracker.repository.SubjectRepository;
 @SpringBootTest
 class AttendanceTrackerApplicationTests {
 
-        @Autowired
-        private WebApplicationContext webApplicationContext;
+	@Autowired
+	private WebApplicationContext webApplicationContext;
 
-        private MockMvc mockMvc;
+	private MockMvc mockMvc;
 
-        @BeforeEach
-        void setUp() {
-            mockMvc = MockMvcBuilders.webAppContextSetup(webApplicationContext).build();
-        }
 	@Autowired
 	private AttendanceRepository attendanceRepository;
 
@@ -41,6 +37,14 @@ class AttendanceTrackerApplicationTests {
 
 	@Autowired
 	private SubjectRepository subjectRepository;
+
+	@BeforeEach
+	void setUp() {
+		attendanceRepository.deleteAll();
+		subjectRepository.deleteAll();
+		studentRepository.deleteAll();
+		mockMvc = MockMvcBuilders.webAppContextSetup(webApplicationContext).build();
+	}
 
 	@Test
 	void attendanceCrudLifecycleWorks() throws Exception {
@@ -85,6 +89,67 @@ class AttendanceTrackerApplicationTests {
 				.andExpect(status().isNoContent());
 		mockMvc.perform(get("/attendance/{id}", attendanceId))
 				.andExpect(status().isNotFound());
+	}
+
+	@Test
+	void attendanceSearchFiltersResultsCorrectly() throws Exception {
+		Student student = studentRepository.save(Student.builder()
+				.rollNumber("ATT-002")
+				.firstName("Mina")
+				.lastName("Khan")
+				.email("mina@example.com")
+				.department("Science")
+				.year(1)
+				.division("B")
+				.build());
+		Subject subject = subjectRepository.save(Subject.builder()
+				.subjectCode("PHY-101")
+				.subjectName("Physics")
+				.credits(4)
+				.build());
+
+		mockMvc.perform(post("/attendance")
+				.contentType(MediaType.APPLICATION_JSON)
+				.content(attendanceRequest(student.getId(), subject.getId(), "PRESENT")))
+				.andExpect(status().isCreated());
+
+		mockMvc.perform(get("/attendance")
+				.param("studentId", student.getId().toString())
+				.param("subjectId", subject.getId().toString())
+				.param("attendanceDate", "2026-08-11")
+				.param("status", "PRESENT"))
+				.andExpect(status().isOk())
+				.andExpect(jsonPath("$[0].studentName").value("Mina Khan"))
+				.andExpect(jsonPath("$[0].subjectName").value("Physics"));
+	}
+
+	@Test
+	void duplicateAttendanceReturnsConflict() throws Exception {
+		Student student = studentRepository.save(Student.builder()
+				.rollNumber("ATT-003")
+				.firstName("Noor")
+				.lastName("Patel")
+				.email("noor@example.com")
+				.department("Math")
+				.year(3)
+				.division("C")
+				.build());
+		Subject subject = subjectRepository.save(Subject.builder()
+				.subjectCode("MTH-101")
+				.subjectName("Mathematics")
+				.credits(3)
+				.build());
+
+		String request = attendanceRequest(student.getId(), subject.getId(), "ABSENT");
+		mockMvc.perform(post("/attendance")
+				.contentType(MediaType.APPLICATION_JSON)
+				.content(request))
+				.andExpect(status().isCreated());
+
+		mockMvc.perform(post("/attendance")
+				.contentType(MediaType.APPLICATION_JSON)
+				.content(request))
+				.andExpect(status().isConflict());
 	}
 
 	@Test
