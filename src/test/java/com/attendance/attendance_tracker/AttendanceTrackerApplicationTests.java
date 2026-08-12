@@ -124,6 +124,33 @@ class AttendanceTrackerApplicationTests {
 	}
 
 	@Test
+	void attendanceSearchWithoutFiltersReturnsAllRecords() throws Exception {
+		Student student = studentRepository.save(Student.builder()
+				.rollNumber("ATT-006")
+				.firstName("Ravi")
+				.lastName("Patel")
+				.email("ravi@example.com")
+				.department("Commerce")
+				.year(1)
+				.division("A")
+				.build());
+		Subject subject = subjectRepository.save(Subject.builder()
+				.subjectCode("BUS-101")
+				.subjectName("Business Studies")
+				.credits(3)
+				.build());
+
+		mockMvc.perform(post("/attendance")
+				.contentType(MediaType.APPLICATION_JSON)
+				.content(attendanceRequest(student.getId(), subject.getId(), "ABSENT")))
+				.andExpect(status().isCreated());
+
+		mockMvc.perform(get("/attendance"))
+				.andExpect(status().isOk())
+				.andExpect(jsonPath("$[0].studentName").value("Ravi Patel"));
+	}
+
+	@Test
 	void duplicateAttendanceReturnsConflict() throws Exception {
 		Student student = studentRepository.save(Student.builder()
 				.rollNumber("ATT-003")
