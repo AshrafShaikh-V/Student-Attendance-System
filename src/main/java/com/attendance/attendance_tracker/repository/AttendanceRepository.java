@@ -34,4 +34,7 @@ public interface AttendanceRepository extends JpaRepository<Attendance, Long> {
 
     boolean existsByStudentIdAndSubjectIdAndAttendanceDate(Long studentId, Long subjectId,
             LocalDate attendanceDate);
+
+    boolean existsByStudentIdAndSubjectIdAndAttendanceDateAndIdNot(Long studentId, Long subjectId,
+            LocalDate attendanceDate, Long id);
 }

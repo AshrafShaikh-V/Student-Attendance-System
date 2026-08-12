@@ -81,6 +81,12 @@ public class AttendanceService {
             existing.setSubject(findSubjectById(dto.getSubjectId()));
         }
 
+        if (attendanceRepository.existsByStudentIdAndSubjectIdAndAttendanceDateAndIdNot(
+                dto.getStudentId(), dto.getSubjectId(), dto.getAttendanceDate(), id)) {
+            throw new com.attendance.attendance_tracker.exception.DuplicateAttendanceException(
+                    "Attendance already recorded for this student, subject and date");
+        }
+
         existing.setAttendanceDate(dto.getAttendanceDate());
         existing.setStatus(dto.getStatus());
 
