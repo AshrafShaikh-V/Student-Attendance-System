@@ -30,6 +30,13 @@ public class AttendanceService {
 
     @Transactional
     public AttendanceResponseDTO createAttendance(AttendanceRequestDTO dto) {
+        // Prevent duplicate attendance for the same student, subject and date.
+        boolean exists = attendanceRepository.existsByStudentIdAndSubjectIdAndAttendanceDate(
+            dto.getStudentId(), dto.getSubjectId(), dto.getAttendanceDate());
+        if (exists) {
+            throw new com.attendance.attendance_tracker.exception.DuplicateAttendanceException(
+                "Attendance already recorded for this student, subject and date");
+        }
         Student student = findStudentById(dto.getStudentId());
         Subject subject = findSubjectById(dto.getSubjectId());
 

@@ -18,3 +18,4 @@ public interface AttendanceRepository extends JpaRepository<Attendance, Long> {
     @Query("SELECT a FROM Attendance a JOIN FETCH a.student s JOIN FETCH a.subject sub")
     List<Attendance> findAllWithDetails();
 }
+    boolean existsByStudentIdAndSubjectIdAndAttendanceDate(Long studentId, Long subjectId, java.time.LocalDate attendanceDate);
