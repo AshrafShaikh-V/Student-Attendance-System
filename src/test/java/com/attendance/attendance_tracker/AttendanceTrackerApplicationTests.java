@@ -153,6 +153,50 @@ class AttendanceTrackerApplicationTests {
 	}
 
 	@Test
+	void duplicateAttendanceUpdateReturnsConflict() throws Exception {
+		Student student = studentRepository.save(Student.builder()
+				.rollNumber("ATT-004")
+				.firstName("Riya")
+				.lastName("Singh")
+				.email("riya@example.com")
+				.department("Arts")
+				.year(2)
+				.division("A")
+				.build());
+		Subject subject = subjectRepository.save(Subject.builder()
+				.subjectCode("ENG-101")
+				.subjectName("English")
+				.credits(3)
+				.build());
+
+		String firstAttendance = attendanceRequest(student.getId(), subject.getId(), "PRESENT");
+		mockMvc.perform(post("/attendance")
+				.contentType(MediaType.APPLICATION_JSON)
+				.content(firstAttendance))
+				.andExpect(status().isCreated());
+
+		String secondAttendance = "{\"studentId\":" + student.getId()
+				+ ",\"subjectId\":" + subject.getId()
+				+ ",\"attendanceDate\":\"2026-08-12\""
+				+ ",\"status\":\"ABSENT\"}";
+		mockMvc.perform(post("/attendance")
+				.contentType(MediaType.APPLICATION_JSON)
+				.content(secondAttendance))
+				.andExpect(status().isCreated());
+
+		Long secondId = attendanceRepository.findAll().stream()
+				.filter(a -> !a.getAttendanceDate().equals(java.time.LocalDate.parse("2026-08-11")))
+				.findFirst()
+				.orElseThrow()
+				.getId();
+
+		mockMvc.perform(put("/attendance/{id}", secondId)
+				.contentType(MediaType.APPLICATION_JSON)
+				.content(attendanceRequest(student.getId(), subject.getId(), "PRESENT")))
+				.andExpect(status().isConflict());
+	}
+
+	@Test
 	void attendanceValidationAndLookupsReturnExpectedErrors() throws Exception {
 		mockMvc.perform(post("/attendance")
 				.contentType(MediaType.APPLICATION_JSON)
