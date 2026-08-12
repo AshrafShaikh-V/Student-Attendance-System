@@ -48,6 +48,20 @@ A robust, enterprise-grade RESTful web application built with **Spring Boot 3**,
 | `PUT` | `/api/subjects/{id}` | Update subject information |
 | `DELETE` | `/api/subjects/{id}` | Remove a subject |
 
+### Attendance API (`/attendance`)
+| Method | Endpoint | Description |
+|--------|----------|-------------|
+| `POST` | `/attendance` | Create attendance for a student and subject |
+| `GET` | `/attendance` | List attendance records, optionally filtered by `studentId`, `subjectId`, `attendanceDate`, or `status` |
+| `GET` | `/attendance/{id}` | Retrieve a single attendance record by ID |
+| `PUT` | `/attendance/{id}` | Update an attendance record, preventing duplicates by student, subject, and date |
+| `DELETE` | `/attendance/{id}` | Delete an attendance record |
+
+> Validation:
+> - `studentId`, `subjectId`, `attendanceDate`, and `status` are required.
+> - `attendanceDate` cannot be in the future.
+> - Duplicate attendance for the same student, subject, and date is rejected with `409 CONFLICT`.
+
 ## 🧪 Running the Application & Tests
 
 ```bash
