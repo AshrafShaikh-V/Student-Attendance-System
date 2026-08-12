@@ -1,7 +1,9 @@
 package com.attendance.attendance_tracker.controller;
 
+import java.time.LocalDate;
 import java.util.List;
 
+import org.springframework.format.annotation.DateTimeFormat;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.DeleteMapping;
@@ -11,10 +13,12 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 import com.attendance.attendance_tracker.dto.AttendanceRequestDTO;
 import com.attendance.attendance_tracker.dto.AttendanceResponseDTO;
+import com.attendance.attendance_tracker.entity.AttendanceStatus;
 import com.attendance.attendance_tracker.service.AttendanceService;
 
 import jakarta.validation.Valid;
@@ -34,8 +38,12 @@ public class AttendanceController {
     }
 
     @GetMapping
-    public ResponseEntity<List<AttendanceResponseDTO>> getAllAttendance() {
-        return ResponseEntity.ok(attendanceService.getAllAttendance());
+    public ResponseEntity<List<AttendanceResponseDTO>> getAllAttendance(
+            @RequestParam(required = false) Long studentId,
+            @RequestParam(required = false) Long subjectId,
+            @RequestParam(required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate attendanceDate,
+            @RequestParam(required = false) AttendanceStatus status) {
+        return ResponseEntity.ok(attendanceService.searchAttendance(studentId, subjectId, attendanceDate, status));
     }
 
     @GetMapping("/{id}")

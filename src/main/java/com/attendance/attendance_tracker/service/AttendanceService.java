@@ -58,6 +58,13 @@ public class AttendanceService {
                 .toList();
     }
 
+    public List<AttendanceResponseDTO> searchAttendance(Long studentId, Long subjectId,
+            java.time.LocalDate attendanceDate, com.attendance.attendance_tracker.entity.AttendanceStatus status) {
+        return attendanceRepository.searchAttendance(studentId, subjectId, attendanceDate, status).stream()
+                .map(this::mapToResponseDTO)
+                .toList();
+    }
+
     public AttendanceResponseDTO getAttendanceById(Long id) {
         Attendance attendance = findAttendanceById(id);
         return mapToResponseDTO(attendance);
