@@ -71,7 +71,7 @@ class AttendanceTrackerApplicationTests {
 				.andExpect(jsonPath("$.studentName").value("Ashraf Shaikh"))
 				.andExpect(jsonPath("$.subjectName").value("Java"));
 
-		Long attendanceId = attendanceRepository.findAll().getFirst().getId();
+		Long attendanceId = attendanceRepository.findAll().get(0).getId();
 		mockMvc.perform(get("/attendance"))
 				.andExpect(status().isOk())
 				.andExpect(jsonPath("$[0].id").value(attendanceId));
@@ -197,6 +197,30 @@ class AttendanceTrackerApplicationTests {
 	}
 
 	@Test
+	void attendanceFutureDateValidationReturnsBadRequest() throws Exception {
+		Student student = studentRepository.save(Student.builder()
+				.rollNumber("ATT-005")
+				.firstName("Tara")
+				.lastName("Iyer")
+				.email("tara@example.com")
+				.department("Commerce")
+				.year(3)
+				.division("D")
+				.build());
+		Subject subject = subjectRepository.save(Subject.builder()
+				.subjectCode("ECO-101")
+				.subjectName("Economics")
+				.credits(4)
+				.build());
+
+		String futureRequest = attendanceRequest(student.getId(), subject.getId(), "2026-09-01", "PRESENT");
+		mockMvc.perform(post("/attendance")
+				.contentType(MediaType.APPLICATION_JSON)
+				.content(futureRequest))
+				.andExpect(status().isBadRequest());
+	}
+
+	@Test
 	void attendanceValidationAndLookupsReturnExpectedErrors() throws Exception {
 		mockMvc.perform(post("/attendance")
 				.contentType(MediaType.APPLICATION_JSON)
@@ -215,9 +239,13 @@ class AttendanceTrackerApplicationTests {
 	}
 
 	private String attendanceRequest(Long studentId, Long subjectId, String status) {
+		return attendanceRequest(studentId, subjectId, "2026-08-11", status);
+	}
+
+	private String attendanceRequest(Long studentId, Long subjectId, String attendanceDate, String status) {
 		return "{\"studentId\":" + studentId
 				+ ",\"subjectId\":" + subjectId
-				+ ",\"attendanceDate\":\"2026-08-11\""
+				+ ",\"attendanceDate\":\"" + attendanceDate + "\""
 				+ ",\"status\":\"" + status + "\"}";
 	}
 
