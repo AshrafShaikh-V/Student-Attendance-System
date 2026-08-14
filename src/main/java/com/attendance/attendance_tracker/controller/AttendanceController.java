@@ -62,6 +62,22 @@ public class AttendanceController {
         return ResponseEntity.ok(attendanceService.getStudentSubjectAttendancePercentage(studentId, subjectId));
     }
 
+    @GetMapping("/report/student/{studentId}")
+    public ResponseEntity<com.attendance.attendance_tracker.dto.AttendanceReportResponseDTO> getAttendanceReportByStudent(@PathVariable Long studentId) {
+        return ResponseEntity.ok(attendanceService.getAttendanceReportByStudent(studentId));
+    }
+
+    @GetMapping("/report/subject/{subjectId}")
+    public ResponseEntity<com.attendance.attendance_tracker.dto.AttendanceReportResponseDTO> getAttendanceReportBySubject(@PathVariable Long subjectId) {
+        return ResponseEntity.ok(attendanceService.getAttendanceReportBySubject(subjectId));
+    }
+
+    @GetMapping("/report/date/{date}")
+    public ResponseEntity<com.attendance.attendance_tracker.dto.AttendanceReportResponseDTO> getAttendanceReportByDate(
+            @PathVariable @org.springframework.format.annotation.DateTimeFormat(iso = org.springframework.format.annotation.DateTimeFormat.ISO.DATE) java.time.LocalDate date) {
+        return ResponseEntity.ok(attendanceService.getAttendanceReportByDate(date));
+    }
+
     @GetMapping("/{id}")
     public ResponseEntity<AttendanceResponseDTO> getAttendanceById(@PathVariable Long id) {
         return ResponseEntity.ok(attendanceService.getAttendanceById(id));

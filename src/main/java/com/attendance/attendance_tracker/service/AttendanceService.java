@@ -132,6 +132,86 @@ public class AttendanceService {
                 .build();
     }
 
+    /**
+     * Milestone 3: Attendance reports
+     */
+    public com.attendance.attendance_tracker.dto.AttendanceReportResponseDTO getAttendanceReportByStudent(Long studentId) {
+        Student student = studentRepository.findById(studentId)
+                .orElseThrow(() -> new StudentNotFoundException(studentId));
+
+        // Fetch records with joins using existing search to benefit from JOIN FETCH
+        java.util.List<Attendance> records = attendanceRepository.searchAttendance(studentId, null, null, null);
+
+        long total = attendanceRepository.countByStudentId(studentId);
+        long present = attendanceRepository.countByStudentIdAndStatus(studentId, com.attendance.attendance_tracker.entity.AttendanceStatus.PRESENT);
+        long absent = attendanceRepository.countByStudentIdAndStatus(studentId, com.attendance.attendance_tracker.entity.AttendanceStatus.ABSENT);
+        double percent = total > 0 ? Math.round((present * 10000.0) / total) / 100.0 : 0.0;
+
+        java.util.List<com.attendance.attendance_tracker.dto.AttendanceResponseDTO> dtoRecords = records.stream()
+                .map(this::mapToResponseDTO)
+                .toList();
+
+        String studentName = student.getFirstName() + (student.getLastName() == null || student.getLastName().isBlank() ? "" : " " + student.getLastName());
+
+        return com.attendance.attendance_tracker.dto.AttendanceReportResponseDTO.builder()
+                .studentId(student.getId())
+                .studentName(studentName)
+                .totalRecords(total)
+                .presentCount(present)
+                .absentCount(absent)
+                .presentPercentage(percent)
+                .records(dtoRecords)
+                .build();
+    }
+
+    public com.attendance.attendance_tracker.dto.AttendanceReportResponseDTO getAttendanceReportBySubject(Long subjectId) {
+        Subject subject = subjectRepository.findById(subjectId)
+                .orElseThrow(() -> new com.attendance.attendance_tracker.exception.SubjectNotFoundException(subjectId));
+
+        java.util.List<Attendance> records = attendanceRepository.searchAttendance(null, subjectId, null, null);
+
+        long total = attendanceRepository.countBySubjectId(subjectId);
+        long present = attendanceRepository.countBySubjectIdAndStatus(subjectId, com.attendance.attendance_tracker.entity.AttendanceStatus.PRESENT);
+        long absent = attendanceRepository.countBySubjectIdAndStatus(subjectId, com.attendance.attendance_tracker.entity.AttendanceStatus.ABSENT);
+        double percent = total > 0 ? Math.round((present * 10000.0) / total) / 100.0 : 0.0;
+
+        java.util.List<com.attendance.attendance_tracker.dto.AttendanceResponseDTO> dtoRecords = records.stream()
+                .map(this::mapToResponseDTO)
+                .toList();
+
+        return com.attendance.attendance_tracker.dto.AttendanceReportResponseDTO.builder()
+                .subjectId(subject.getId())
+                .subjectName(subject.getSubjectName())
+                .totalRecords(total)
+                .presentCount(present)
+                .absentCount(absent)
+                .presentPercentage(percent)
+                .records(dtoRecords)
+                .build();
+    }
+
+    public com.attendance.attendance_tracker.dto.AttendanceReportResponseDTO getAttendanceReportByDate(java.time.LocalDate date) {
+        java.util.List<Attendance> records = attendanceRepository.searchAttendance(null, null, date, null);
+
+        long total = attendanceRepository.countByAttendanceDate(date);
+        long present = attendanceRepository.countByAttendanceDateAndStatus(date, com.attendance.attendance_tracker.entity.AttendanceStatus.PRESENT);
+        long absent = attendanceRepository.countByAttendanceDateAndStatus(date, com.attendance.attendance_tracker.entity.AttendanceStatus.ABSENT);
+        double percent = total > 0 ? Math.round((present * 10000.0) / total) / 100.0 : 0.0;
+
+        java.util.List<com.attendance.attendance_tracker.dto.AttendanceResponseDTO> dtoRecords = records.stream()
+                .map(this::mapToResponseDTO)
+                .toList();
+
+        return com.attendance.attendance_tracker.dto.AttendanceReportResponseDTO.builder()
+                .date(date)
+                .totalRecords(total)
+                .presentCount(present)
+                .absentCount(absent)
+                .presentPercentage(percent)
+                .records(dtoRecords)
+                .build();
+    }
+
     @Transactional
     public AttendanceResponseDTO updateAttendance(Long id, AttendanceRequestDTO dto) {
         Attendance existing = findAttendanceById(id);

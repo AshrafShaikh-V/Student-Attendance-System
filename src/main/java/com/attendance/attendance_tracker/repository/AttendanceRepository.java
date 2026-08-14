@@ -46,4 +46,14 @@ public interface AttendanceRepository extends JpaRepository<Attendance, Long> {
     long countByStudentIdAndSubjectId(Long studentId, Long subjectId);
 
     long countByStudentIdAndSubjectIdAndStatus(Long studentId, Long subjectId, AttendanceStatus status);
+
+    // Subject-level counts
+    long countBySubjectId(Long subjectId);
+
+    long countBySubjectIdAndStatus(Long subjectId, AttendanceStatus status);
+
+    // Date-level counts
+    long countByAttendanceDate(java.time.LocalDate date);
+
+    long countByAttendanceDateAndStatus(java.time.LocalDate date, AttendanceStatus status);
 }
