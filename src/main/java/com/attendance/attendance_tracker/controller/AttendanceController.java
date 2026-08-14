@@ -63,8 +63,8 @@ public class AttendanceController {
     }
 
     @GetMapping("/report/student/{studentId}")
-    public ResponseEntity<com.attendance.attendance_tracker.dto.AttendanceReportResponseDTO> getAttendanceReportByStudent(@PathVariable Long studentId) {
-        return ResponseEntity.ok(attendanceService.getAttendanceReportByStudent(studentId));
+    public ResponseEntity<com.attendance.attendance_tracker.dto.StudentAttendanceReportDTO> getAttendanceReportByStudent(@PathVariable Long studentId) {
+        return ResponseEntity.ok(attendanceService.getStudentAttendanceReport(studentId));
     }
 
     @GetMapping("/report/subject/{subjectId}")

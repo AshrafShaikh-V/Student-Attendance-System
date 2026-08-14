@@ -178,6 +178,34 @@ public class AttendanceService {
                 .build();
     }
 
+    /**
+     * Milestone 1 (Phase 12): Student attendance report (front-end friendly DTO)
+     */
+    public com.attendance.attendance_tracker.dto.StudentAttendanceReportDTO getStudentAttendanceReport(Long studentId) {
+        // Reuse existing percentage calculation
+        com.attendance.attendance_tracker.dto.AttendancePercentageResponseDTO pct = getStudentAttendancePercentage(studentId);
+
+        // Fetch attendance history (JOIN FETCHed) and map to lightweight history entries
+        java.util.List<Attendance> records = attendanceRepository.searchAttendance(studentId, null, null, null);
+        java.util.List<com.attendance.attendance_tracker.dto.AttendanceHistoryEntryDTO> history = records.stream()
+                .map(a -> com.attendance.attendance_tracker.dto.AttendanceHistoryEntryDTO.builder()
+                        .attendanceDate(a.getAttendanceDate())
+                        .subjectName(a.getSubject().getSubjectName())
+                        .status(a.getStatus().name())
+                        .build())
+                .toList();
+
+        return com.attendance.attendance_tracker.dto.StudentAttendanceReportDTO.builder()
+                .studentId(pct.getStudentId())
+                .studentName(pct.getStudentName())
+                .totalClasses(pct.getTotalClasses())
+                .presentClasses(pct.getPresentClasses())
+                .absentClasses(pct.getAbsentClasses())
+                .attendancePercentage(pct.getAttendancePercentage())
+                .attendanceHistory(history)
+                .build();
+    }
+
     public com.attendance.attendance_tracker.dto.AttendanceReportResponseDTO getAttendanceReportBySubject(Long subjectId) {
         Subject subject = subjectRepository.findById(subjectId)
                 .orElseThrow(() -> new com.attendance.attendance_tracker.exception.SubjectNotFoundException(subjectId));
