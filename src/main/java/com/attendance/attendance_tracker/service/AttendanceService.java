@@ -232,6 +232,55 @@ public class AttendanceService {
                 .build();
     }
 
+    /**
+     * Milestone 2 (Phase 12): Subject attendance report
+     */
+    public com.attendance.attendance_tracker.dto.SubjectAttendanceReportDTO getSubjectAttendanceReport(Long subjectId) {
+        Subject subject = subjectRepository.findById(subjectId)
+                .orElseThrow(() -> new com.attendance.attendance_tracker.exception.SubjectNotFoundException(subjectId));
+
+        // Use grouped counts to get present/absent/total efficiently
+        java.util.List<Object[]> grouped = attendanceRepository.countBySubjectGroupedByStatus(subjectId);
+        long present = 0L, absent = 0L, totalRecords = 0L;
+        for (Object[] row : grouped) {
+            com.attendance.attendance_tracker.entity.AttendanceStatus status = (com.attendance.attendance_tracker.entity.AttendanceStatus) row[0];
+            long cnt = ((Number) row[1]).longValue();
+            totalRecords += cnt;
+            if (status == com.attendance.attendance_tracker.entity.AttendanceStatus.PRESENT) present = cnt;
+            else if (status == com.attendance.attendance_tracker.entity.AttendanceStatus.ABSENT) absent = cnt;
+        }
+
+        // totalStudents: distinct students who have attendance records for this subject
+        long totalStudents = attendanceRepository.findAllWithDetails().stream()
+                .filter(a -> a.getSubject().getId().equals(subjectId))
+                .map(a -> a.getStudent().getId())
+                .distinct()
+                .count();
+
+        double percent = totalRecords > 0 ? Math.round((present * 10000.0) / totalRecords) / 100.0 : 0.0;
+
+        // History: map records to subject-specific history entries (student info)
+        java.util.List<SubjectAttendanceHistoryEntryDTO> history = records.stream()
+                .map(a -> SubjectAttendanceHistoryEntryDTO.builder()
+                        .attendanceDate(a.getAttendanceDate())
+                        .studentId(a.getStudent().getId())
+                        .studentName(a.getStudent().getFirstName() + " " + a.getStudent().getLastName())
+                        .status(a.getStatus().name())
+                        .build())
+                .toList();
+
+        return com.attendance.attendance_tracker.dto.SubjectAttendanceReportDTO.builder()
+                .subjectId(subject.getId())
+                .subjectName(subject.getSubjectName())
+                .totalStudents(totalStudents)
+                .totalAttendanceRecords(totalRecords)
+                .presentCount(present)
+                .absentCount(absent)
+                .attendancePercentage(percent)
+                .attendanceHistory(history)
+                .build();
+    }
+
     public com.attendance.attendance_tracker.dto.AttendanceReportResponseDTO getAttendanceReportByDate(java.time.LocalDate date) {
         java.util.List<Attendance> records = attendanceRepository.searchAttendance(null, null, date, null);
 
