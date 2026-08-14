@@ -73,9 +73,9 @@ public class AttendanceController {
     }
 
     @GetMapping("/report/date/{date}")
-    public ResponseEntity<com.attendance.attendance_tracker.dto.AttendanceReportResponseDTO> getAttendanceReportByDate(
+    public ResponseEntity<com.attendance.attendance_tracker.dto.DailyAttendanceReportDTO> getAttendanceReportByDate(
             @PathVariable @org.springframework.format.annotation.DateTimeFormat(iso = org.springframework.format.annotation.DateTimeFormat.ISO.DATE) java.time.LocalDate date) {
-        return ResponseEntity.ok(attendanceService.getAttendanceReportByDate(date));
+        return ResponseEntity.ok(attendanceService.getDailyAttendanceReport(date));
     }
 
     @GetMapping("/{id}")

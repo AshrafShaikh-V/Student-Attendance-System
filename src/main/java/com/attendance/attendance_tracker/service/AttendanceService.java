@@ -303,6 +303,50 @@ public class AttendanceService {
                 .build();
     }
 
+    /**
+     * Milestone 3 (Phase 12): Daily attendance report
+     */
+    public com.attendance.attendance_tracker.dto.DailyAttendanceReportDTO getDailyAttendanceReport(java.time.LocalDate date) {
+        // Use grouped counts for efficiency
+        java.util.List<Object[]> grouped = attendanceRepository.countByDateGroupedByStatus(date);
+        long present = 0L, absent = 0L, total = 0L;
+        for (Object[] row : grouped) {
+            com.attendance.attendance_tracker.entity.AttendanceStatus status = (com.attendance.attendance_tracker.entity.AttendanceStatus) row[0];
+            long cnt = ((Number) row[1]).longValue();
+            total += cnt;
+            if (status == com.attendance.attendance_tracker.entity.AttendanceStatus.PRESENT) present = cnt;
+            else if (status == com.attendance.attendance_tracker.entity.AttendanceStatus.ABSENT) absent = cnt;
+        }
+
+        double percent = total > 0 ? Math.round((present * 10000.0) / total) / 100.0 : 0.0;
+
+        java.util.List<Attendance> records = attendanceRepository.searchAttendance(null, null, date, null);
+
+        java.util.List<com.attendance.attendance_tracker.dto.DailyAttendanceEntryDTO> entries = records.stream()
+                .map(a -> com.attendance.attendance_tracker.dto.DailyAttendanceEntryDTO.builder()
+                        .studentId(a.getStudent().getId())
+                        .studentName(a.getStudent().getFirstName() + (a.getStudent().getLastName() == null || a.getStudent().getLastName().isBlank() ? "" : " " + a.getStudent().getLastName()))
+                        .subjectId(a.getSubject().getId())
+                        .subjectName(a.getSubject().getSubjectName())
+                        .status(a.getStatus().name())
+                        .build())
+                .toList();
+
+        long totalStudentsMarked = records.stream()
+                .map(a -> a.getStudent().getId())
+                .distinct()
+                .count();
+
+        return com.attendance.attendance_tracker.dto.DailyAttendanceReportDTO.builder()
+                .attendanceDate(date)
+                .totalStudentsMarked(totalStudentsMarked)
+                .presentCount(present)
+                .absentCount(absent)
+                .attendancePercentage(percent)
+                .attendanceList(entries)
+                .build();
+    }
+
     @Transactional
     public AttendanceResponseDTO updateAttendance(Long id, AttendanceRequestDTO dto) {
         Attendance existing = findAttendanceById(id);
