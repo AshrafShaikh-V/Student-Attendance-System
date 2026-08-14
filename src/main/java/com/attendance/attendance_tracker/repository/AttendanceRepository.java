@@ -56,4 +56,20 @@ public interface AttendanceRepository extends JpaRepository<Attendance, Long> {
     long countByAttendanceDate(java.time.LocalDate date);
 
     long countByAttendanceDateAndStatus(java.time.LocalDate date, AttendanceStatus status);
+
+    /*
+     * Grouped counts to optimize percentage calculations: return pairs of (status, count)
+     * so services can compute totals from a single query instead of multiple count queries.
+     */
+    @Query("SELECT a.status, COUNT(a) FROM Attendance a WHERE a.student.id = :studentId GROUP BY a.status")
+    java.util.List<Object[]> countByStudentGroupedByStatus(@Param("studentId") Long studentId);
+
+    @Query("SELECT a.status, COUNT(a) FROM Attendance a WHERE a.student.id = :studentId AND a.subject.id = :subjectId GROUP BY a.status")
+    java.util.List<Object[]> countByStudentAndSubjectGroupedByStatus(@Param("studentId") Long studentId, @Param("subjectId") Long subjectId);
+
+    @Query("SELECT a.status, COUNT(a) FROM Attendance a WHERE a.subject.id = :subjectId GROUP BY a.status")
+    java.util.List<Object[]> countBySubjectGroupedByStatus(@Param("subjectId") Long subjectId);
+
+    @Query("SELECT a.status, COUNT(a) FROM Attendance a WHERE a.attendanceDate = :date GROUP BY a.status")
+    java.util.List<Object[]> countByDateGroupedByStatus(@Param("date") java.time.LocalDate date);
 }

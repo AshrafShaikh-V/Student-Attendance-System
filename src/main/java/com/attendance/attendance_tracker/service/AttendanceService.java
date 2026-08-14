@@ -78,9 +78,16 @@ public class AttendanceService {
         Student student = studentRepository.findById(studentId)
                 .orElseThrow(() -> new StudentNotFoundException(studentId));
 
-        long total = attendanceRepository.countByStudentId(studentId);
-        long present = attendanceRepository.countByStudentIdAndStatus(studentId, com.attendance.attendance_tracker.entity.AttendanceStatus.PRESENT);
-        long absent = attendanceRepository.countByStudentIdAndStatus(studentId, com.attendance.attendance_tracker.entity.AttendanceStatus.ABSENT);
+        // Use grouped query to reduce DB round-trips
+        java.util.List<Object[]> grouped = attendanceRepository.countByStudentGroupedByStatus(studentId);
+        long present = 0L, absent = 0L, total = 0L;
+        for (Object[] row : grouped) {
+            com.attendance.attendance_tracker.entity.AttendanceStatus status = (com.attendance.attendance_tracker.entity.AttendanceStatus) row[0];
+            long cnt = ((Number) row[1]).longValue();
+            total += cnt;
+            if (status == com.attendance.attendance_tracker.entity.AttendanceStatus.PRESENT) present = cnt;
+            else if (status == com.attendance.attendance_tracker.entity.AttendanceStatus.ABSENT) absent = cnt;
+        }
 
         double percentage = 0.0;
         if (total > 0) {
@@ -109,9 +116,16 @@ public class AttendanceService {
         Subject subject = subjectRepository.findById(subjectId)
                 .orElseThrow(() -> new com.attendance.attendance_tracker.exception.SubjectNotFoundException(subjectId));
 
-        long total = attendanceRepository.countByStudentIdAndSubjectId(studentId, subjectId);
-        long present = attendanceRepository.countByStudentIdAndSubjectIdAndStatus(studentId, subjectId, com.attendance.attendance_tracker.entity.AttendanceStatus.PRESENT);
-        long absent = attendanceRepository.countByStudentIdAndSubjectIdAndStatus(studentId, subjectId, com.attendance.attendance_tracker.entity.AttendanceStatus.ABSENT);
+        // Use grouped query to reduce DB round-trips for student+subject
+        java.util.List<Object[]> grouped = attendanceRepository.countByStudentAndSubjectGroupedByStatus(studentId, subjectId);
+        long present = 0L, absent = 0L, total = 0L;
+        for (Object[] row : grouped) {
+            com.attendance.attendance_tracker.entity.AttendanceStatus status = (com.attendance.attendance_tracker.entity.AttendanceStatus) row[0];
+            long cnt = ((Number) row[1]).longValue();
+            total += cnt;
+            if (status == com.attendance.attendance_tracker.entity.AttendanceStatus.PRESENT) present = cnt;
+            else if (status == com.attendance.attendance_tracker.entity.AttendanceStatus.ABSENT) absent = cnt;
+        }
 
         double percentage = 0.0;
         if (total > 0) {
