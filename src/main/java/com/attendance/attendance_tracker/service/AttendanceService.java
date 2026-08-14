@@ -70,6 +70,36 @@ public class AttendanceService {
         return mapToResponseDTO(attendance);
     }
 
+    /**
+     * Milestone 1: Calculate attendance percentage for a student.
+     */
+    public com.attendance.attendance_tracker.dto.AttendancePercentageResponseDTO getStudentAttendancePercentage(Long studentId) {
+        // Verify student exists (throws StudentNotFoundException if absent)
+        Student student = studentRepository.findById(studentId)
+                .orElseThrow(() -> new StudentNotFoundException(studentId));
+
+        long total = attendanceRepository.countByStudentId(studentId);
+        long present = attendanceRepository.countByStudentIdAndStatus(studentId, com.attendance.attendance_tracker.entity.AttendanceStatus.PRESENT);
+        long absent = attendanceRepository.countByStudentIdAndStatus(studentId, com.attendance.attendance_tracker.entity.AttendanceStatus.ABSENT);
+
+        double percentage = 0.0;
+        if (total > 0) {
+            // Present / Total * 100, rounded to 2 decimal places
+            percentage = Math.round((present * 10000.0) / total) / 100.0;
+        }
+
+        String studentName = student.getFirstName() + (student.getLastName() == null || student.getLastName().isBlank() ? "" : " " + student.getLastName());
+
+        return com.attendance.attendance_tracker.dto.AttendancePercentageResponseDTO.builder()
+                .studentId(student.getId())
+                .studentName(studentName)
+                .totalClasses(total)
+                .presentClasses(present)
+                .absentClasses(absent)
+                .attendancePercentage(percentage)
+                .build();
+    }
+
     @Transactional
     public AttendanceResponseDTO updateAttendance(Long id, AttendanceRequestDTO dto) {
         Attendance existing = findAttendanceById(id);

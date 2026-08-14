@@ -37,4 +37,9 @@ public interface AttendanceRepository extends JpaRepository<Attendance, Long> {
 
     boolean existsByStudentIdAndSubjectIdAndAttendanceDateAndIdNot(Long studentId, Long subjectId,
             LocalDate attendanceDate, Long id);
+
+    // Counts for analytics without loading entities
+    long countByStudentId(Long studentId);
+
+    long countByStudentIdAndStatus(Long studentId, AttendanceStatus status);
 }

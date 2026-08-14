@@ -50,6 +50,12 @@ public class AttendanceController {
         return ResponseEntity.ok(attendanceService.searchAttendance(studentId, subjectId, attendanceDate, status));
     }
 
+    @GetMapping("/student/{studentId}/percentage")
+    public ResponseEntity<com.attendance.attendance_tracker.dto.AttendancePercentageResponseDTO> getStudentAttendancePercentage(
+            @PathVariable Long studentId) {
+        return ResponseEntity.ok(attendanceService.getStudentAttendancePercentage(studentId));
+    }
+
     @GetMapping("/{id}")
     public ResponseEntity<AttendanceResponseDTO> getAttendanceById(@PathVariable Long id) {
         return ResponseEntity.ok(attendanceService.getAttendanceById(id));
