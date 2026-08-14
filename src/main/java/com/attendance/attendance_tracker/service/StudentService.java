@@ -53,10 +53,13 @@ public class StudentService {
         Student existingStudent = studentRepository.findById(id)
                 .orElseThrow(() -> new StudentNotFoundException(id));
 
-        if (studentRepository.existsByRollNumberAndIdNot(requestDTO.getRollNumber(), id)) {
+        // Only check uniqueness if the value is actually changing to reduce DB calls
+        if (!existingStudent.getRollNumber().equals(requestDTO.getRollNumber()) &&
+                studentRepository.existsByRollNumberAndIdNot(requestDTO.getRollNumber(), id)) {
             throw new DuplicateStudentException("Another student exists with roll number: " + requestDTO.getRollNumber());
         }
-        if (studentRepository.existsByEmailAndIdNot(requestDTO.getEmail(), id)) {
+        if (!existingStudent.getEmail().equals(requestDTO.getEmail()) &&
+                studentRepository.existsByEmailAndIdNot(requestDTO.getEmail(), id)) {
             throw new DuplicateStudentException("Another student exists with email: " + requestDTO.getEmail());
         }
 
@@ -74,9 +77,10 @@ public class StudentService {
 
     @Transactional
     public void deleteStudent(Long id) {
-        Student student = studentRepository.findById(id)
-                .orElseThrow(() -> new StudentNotFoundException(id));
-        studentRepository.delete(student);
+        if (!studentRepository.existsById(id)) {
+            throw new StudentNotFoundException(id);
+        }
+        studentRepository.deleteById(id);
     }
 
     public List<StudentResponseDTO> searchStudents(String query) {

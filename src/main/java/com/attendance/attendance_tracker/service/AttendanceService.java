@@ -96,9 +96,10 @@ public class AttendanceService {
 
     @Transactional
     public void deleteAttendance(Long id) {
-        Attendance attendance = attendanceRepository.findById(id)
-                .orElseThrow(() -> new AttendanceNotFoundException(id));
-        attendanceRepository.delete(attendance);
+        if (!attendanceRepository.existsById(id)) {
+            throw new AttendanceNotFoundException(id);
+        }
+        attendanceRepository.deleteById(id);
     }
 
     private Student findStudentById(Long id) {

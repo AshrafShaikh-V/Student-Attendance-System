@@ -50,7 +50,9 @@ public class SubjectService {
         Subject existingSubject = subjectRepository.findById(id)
                 .orElseThrow(() -> new SubjectNotFoundException(id));
 
-        if (subjectRepository.existsBySubjectCodeAndIdNot(requestDTO.getSubjectCode(), id)) {
+        // Only check uniqueness if the code changed
+        if (!existingSubject.getSubjectCode().equals(requestDTO.getSubjectCode()) &&
+                subjectRepository.existsBySubjectCodeAndIdNot(requestDTO.getSubjectCode(), id)) {
             throw new DuplicateSubjectException("Another subject exists with code: " + requestDTO.getSubjectCode());
         }
 
@@ -64,9 +66,10 @@ public class SubjectService {
 
     @Transactional
     public void deleteSubject(Long id) {
-        Subject subject = subjectRepository.findById(id)
-                .orElseThrow(() -> new SubjectNotFoundException(id));
-        subjectRepository.delete(subject);
+        if (!subjectRepository.existsById(id)) {
+            throw new SubjectNotFoundException(id);
+        }
+        subjectRepository.deleteById(id);
     }
 
     public List<SubjectResponseDTO> searchSubjects(String query) {

@@ -52,7 +52,9 @@ public class TeacherService {
         Teacher existingTeacher = teacherRepository.findById(id)
                 .orElseThrow(() -> new TeacherNotFoundException(id));
 
-        if (teacherRepository.existsByEmailAndIdNot(requestDTO.getEmail(), id)) {
+        // Only check uniqueness when email changes to avoid extra DB call
+        if (!existingTeacher.getEmail().equals(requestDTO.getEmail()) &&
+                teacherRepository.existsByEmailAndIdNot(requestDTO.getEmail(), id)) {
             throw new DuplicateTeacherException("Another teacher exists with email: " + requestDTO.getEmail());
         }
 
@@ -71,9 +73,10 @@ public class TeacherService {
 
     @Transactional
     public void deleteTeacher(Long id) {
-        Teacher teacher = teacherRepository.findById(id)
-                .orElseThrow(() -> new TeacherNotFoundException(id));
-        teacherRepository.delete(teacher);
+        if (!teacherRepository.existsById(id)) {
+            throw new TeacherNotFoundException(id);
+        }
+        teacherRepository.deleteById(id);
     }
 
     public List<TeacherResponseDTO> searchTeachers(String query) {
