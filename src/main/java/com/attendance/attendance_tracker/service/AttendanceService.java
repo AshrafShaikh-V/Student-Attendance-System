@@ -156,9 +156,16 @@ public class AttendanceService {
         // Fetch records with joins using existing search to benefit from JOIN FETCH
         java.util.List<Attendance> records = attendanceRepository.searchAttendance(studentId, null, null, null);
 
-        long total = attendanceRepository.countByStudentId(studentId);
-        long present = attendanceRepository.countByStudentIdAndStatus(studentId, com.attendance.attendance_tracker.entity.AttendanceStatus.PRESENT);
-        long absent = attendanceRepository.countByStudentIdAndStatus(studentId, com.attendance.attendance_tracker.entity.AttendanceStatus.ABSENT);
+        // Use grouped counts for efficiency
+        java.util.List<Object[]> grouped = attendanceRepository.countByStudentGroupedByStatus(studentId);
+        long present = 0L, absent = 0L, total = 0L;
+        for (Object[] row : grouped) {
+            com.attendance.attendance_tracker.entity.AttendanceStatus status = (com.attendance.attendance_tracker.entity.AttendanceStatus) row[0];
+            long cnt = ((Number) row[1]).longValue();
+            total += cnt;
+            if (status == com.attendance.attendance_tracker.entity.AttendanceStatus.PRESENT) present = cnt;
+            else if (status == com.attendance.attendance_tracker.entity.AttendanceStatus.ABSENT) absent = cnt;
+        }
         double percent = total > 0 ? Math.round((present * 10000.0) / total) / 100.0 : 0.0;
 
         java.util.List<com.attendance.attendance_tracker.dto.AttendanceResponseDTO> dtoRecords = records.stream()
@@ -212,9 +219,16 @@ public class AttendanceService {
 
         java.util.List<Attendance> records = attendanceRepository.searchAttendance(null, subjectId, null, null);
 
-        long total = attendanceRepository.countBySubjectId(subjectId);
-        long present = attendanceRepository.countBySubjectIdAndStatus(subjectId, com.attendance.attendance_tracker.entity.AttendanceStatus.PRESENT);
-        long absent = attendanceRepository.countBySubjectIdAndStatus(subjectId, com.attendance.attendance_tracker.entity.AttendanceStatus.ABSENT);
+        // Use grouped counts for subject
+        java.util.List<Object[]> grouped = attendanceRepository.countBySubjectGroupedByStatus(subjectId);
+        long present = 0L, absent = 0L, total = 0L;
+        for (Object[] row : grouped) {
+            com.attendance.attendance_tracker.entity.AttendanceStatus status = (com.attendance.attendance_tracker.entity.AttendanceStatus) row[0];
+            long cnt = ((Number) row[1]).longValue();
+            total += cnt;
+            if (status == com.attendance.attendance_tracker.entity.AttendanceStatus.PRESENT) present = cnt;
+            else if (status == com.attendance.attendance_tracker.entity.AttendanceStatus.ABSENT) absent = cnt;
+        }
         double percent = total > 0 ? Math.round((present * 10000.0) / total) / 100.0 : 0.0;
 
         java.util.List<com.attendance.attendance_tracker.dto.AttendanceResponseDTO> dtoRecords = records.stream()
@@ -284,9 +298,16 @@ public class AttendanceService {
     public com.attendance.attendance_tracker.dto.AttendanceReportResponseDTO getAttendanceReportByDate(java.time.LocalDate date) {
         java.util.List<Attendance> records = attendanceRepository.searchAttendance(null, null, date, null);
 
-        long total = attendanceRepository.countByAttendanceDate(date);
-        long present = attendanceRepository.countByAttendanceDateAndStatus(date, com.attendance.attendance_tracker.entity.AttendanceStatus.PRESENT);
-        long absent = attendanceRepository.countByAttendanceDateAndStatus(date, com.attendance.attendance_tracker.entity.AttendanceStatus.ABSENT);
+        // Use grouped counts for date
+        java.util.List<Object[]> grouped = attendanceRepository.countByDateGroupedByStatus(date);
+        long present = 0L, absent = 0L, total = 0L;
+        for (Object[] row : grouped) {
+            com.attendance.attendance_tracker.entity.AttendanceStatus status = (com.attendance.attendance_tracker.entity.AttendanceStatus) row[0];
+            long cnt = ((Number) row[1]).longValue();
+            total += cnt;
+            if (status == com.attendance.attendance_tracker.entity.AttendanceStatus.PRESENT) present = cnt;
+            else if (status == com.attendance.attendance_tracker.entity.AttendanceStatus.ABSENT) absent = cnt;
+        }
         double percent = total > 0 ? Math.round((present * 10000.0) / total) / 100.0 : 0.0;
 
         java.util.List<com.attendance.attendance_tracker.dto.AttendanceResponseDTO> dtoRecords = records.stream()

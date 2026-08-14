@@ -32,9 +32,15 @@ public class DashboardService {
         long totalSubjects = subjectRepository.count();
         long totalAttendanceRecords = attendanceRepository.count();
 
-        long todaysAttendanceCount = attendanceRepository.countByAttendanceDate(today);
-        long presentToday = attendanceRepository.countByAttendanceDateAndStatus(today, AttendanceStatus.PRESENT);
-        long absentToday = attendanceRepository.countByAttendanceDateAndStatus(today, AttendanceStatus.ABSENT);
+        java.util.List<Object[]> grouped = attendanceRepository.countByDateGroupedByStatus(today);
+        long todaysAttendanceCount = 0L, presentToday = 0L, absentToday = 0L;
+        for (Object[] row : grouped) {
+            com.attendance.attendance_tracker.entity.AttendanceStatus status = (com.attendance.attendance_tracker.entity.AttendanceStatus) row[0];
+            long cnt = ((Number) row[1]).longValue();
+            todaysAttendanceCount += cnt;
+            if (status == AttendanceStatus.PRESENT) presentToday = cnt;
+            else if (status == AttendanceStatus.ABSENT) absentToday = cnt;
+        }
 
         return DashboardSummaryDTO.builder()
                 .totalStudents(totalStudents)

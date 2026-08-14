@@ -38,25 +38,6 @@ public interface AttendanceRepository extends JpaRepository<Attendance, Long> {
     boolean existsByStudentIdAndSubjectIdAndAttendanceDateAndIdNot(Long studentId, Long subjectId,
             LocalDate attendanceDate, Long id);
 
-    // Counts for analytics without loading entities
-    long countByStudentId(Long studentId);
-
-    long countByStudentIdAndStatus(Long studentId, AttendanceStatus status);
-
-    long countByStudentIdAndSubjectId(Long studentId, Long subjectId);
-
-    long countByStudentIdAndSubjectIdAndStatus(Long studentId, Long subjectId, AttendanceStatus status);
-
-    // Subject-level counts
-    long countBySubjectId(Long subjectId);
-
-    long countBySubjectIdAndStatus(Long subjectId, AttendanceStatus status);
-
-    // Date-level counts
-    long countByAttendanceDate(java.time.LocalDate date);
-
-    long countByAttendanceDateAndStatus(java.time.LocalDate date, AttendanceStatus status);
-
     /*
      * Grouped counts to optimize percentage calculations: return pairs of (status, count)
      * so services can compute totals from a single query instead of multiple count queries.
