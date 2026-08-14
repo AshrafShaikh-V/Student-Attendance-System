@@ -100,6 +100,38 @@ public class AttendanceService {
                 .build();
     }
 
+    /**
+     * Milestone 2: Calculate subject-wise attendance percentage for a student.
+     */
+    public com.attendance.attendance_tracker.dto.AttendanceSubjectPercentageResponseDTO getStudentSubjectAttendancePercentage(Long studentId, Long subjectId) {
+        Student student = studentRepository.findById(studentId)
+                .orElseThrow(() -> new StudentNotFoundException(studentId));
+        Subject subject = subjectRepository.findById(subjectId)
+                .orElseThrow(() -> new com.attendance.attendance_tracker.exception.SubjectNotFoundException(subjectId));
+
+        long total = attendanceRepository.countByStudentIdAndSubjectId(studentId, subjectId);
+        long present = attendanceRepository.countByStudentIdAndSubjectIdAndStatus(studentId, subjectId, com.attendance.attendance_tracker.entity.AttendanceStatus.PRESENT);
+        long absent = attendanceRepository.countByStudentIdAndSubjectIdAndStatus(studentId, subjectId, com.attendance.attendance_tracker.entity.AttendanceStatus.ABSENT);
+
+        double percentage = 0.0;
+        if (total > 0) {
+            percentage = Math.round((present * 10000.0) / total) / 100.0;
+        }
+
+        String studentName = student.getFirstName() + (student.getLastName() == null || student.getLastName().isBlank() ? "" : " " + student.getLastName());
+
+        return com.attendance.attendance_tracker.dto.AttendanceSubjectPercentageResponseDTO.builder()
+                .studentId(student.getId())
+                .studentName(studentName)
+                .subjectId(subject.getId())
+                .subjectName(subject.getSubjectName())
+                .totalClasses(total)
+                .presentClasses(present)
+                .absentClasses(absent)
+                .attendancePercentage(percentage)
+                .build();
+    }
+
     @Transactional
     public AttendanceResponseDTO updateAttendance(Long id, AttendanceRequestDTO dto) {
         Attendance existing = findAttendanceById(id);
