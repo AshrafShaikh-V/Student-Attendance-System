@@ -18,6 +18,8 @@ public interface TeacherRepository extends JpaRepository<Teacher, Long> {
 
     Optional<Teacher> findByEmail(String email);
 
+    Optional<Teacher> findByEmailIgnoreCase(String email);
+
     long countByRole(Role role);
 
     List<Teacher> findByEmailContainingIgnoreCaseOrFirstNameContainingIgnoreCaseOrLastNameContainingIgnoreCase(
