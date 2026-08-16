@@ -7,6 +7,7 @@ import org.springframework.transaction.annotation.Transactional;
 
 import com.attendance.attendance_tracker.dto.AttendanceRequestDTO;
 import com.attendance.attendance_tracker.dto.AttendanceResponseDTO;
+import com.attendance.attendance_tracker.dto.SubjectAttendanceHistoryEntryDTO;
 import com.attendance.attendance_tracker.entity.Attendance;
 import com.attendance.attendance_tracker.entity.Student;
 import com.attendance.attendance_tracker.entity.Subject;
@@ -270,6 +271,8 @@ public class AttendanceService {
                 .map(a -> a.getStudent().getId())
                 .distinct()
                 .count();
+
+        List<Attendance> records = attendanceRepository.searchAttendance(null, subjectId, null, null);
 
         double percent = totalRecords > 0 ? Math.round((present * 10000.0) / totalRecords) / 100.0 : 0.0;
 
