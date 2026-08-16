@@ -31,3 +31,19 @@ build/
 
 ### VS Code ###
 .vscode/
+
+### Environment files ###
+.env
+.env.*
+!.env.example
+
+### Logs ###
+*.log
+
+### Docker ###
+docker-compose.override.yml
+
+### Java / Maven ###
+*.jar
+*.war
+

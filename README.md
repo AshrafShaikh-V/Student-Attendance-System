@@ -2,79 +2,130 @@
 
 ## Project Overview
 
-This project is a Spring Boot REST API for managing student attendance records in an academic environment. It supports managing students, teachers, subjects, attendance entries, and attendance summaries without exposing database entities directly to clients.
+The Student Attendance Management System is a Spring Boot backend application designed for academic institutions to track, manage, and monitor student attendance efficiently. The system provides CRUD support for students, teachers, subjects, and attendance records while also calculating attendance percentages and generating attendance summaries for reporting.
 
-The system is designed to be easy to consume by a frontend application while maintaining a clean separation between controllers, services, repositories, DTOs, and exception handling.
+The project follows a clean layered architecture based on controllers, services, repositories, DTOs, and centralized exception handling. It is designed to be easy to integrate with frontend applications and to remain maintainable for academic project demonstrations, portfolio submission, and interviews.
 
 ## Features
 
-- Student CRUD operations
-- Teacher CRUD operations
-- Subject CRUD operations
+- Student management with validation and unique identifiers
+- Teacher management with secure password handling
+- Subject management with unique subject codes
 - Attendance record creation, update, and deletion
-- Attendance filtering by student, subject, date, and status
-- Student attendance percentage calculation
-- Subject-level and date-level attendance reporting
-- Request validation with meaningful error responses
+- Filtered attendance queries by student, subject, date, and status
+- Attendance percentage calculation per student and subject
+- Attendance reporting by student, subject, and date
+- JWT-based authentication and role-based authorization
 - Centralized global exception handling
-- Flyway-based database migration scripts
-- OpenAPI / Swagger-based API documentation
+- OpenAPI / Swagger documentation
+- Docker and MySQL support for easy deployment
 
 ## Tech Stack
 
 - Java 26
 - Spring Boot 4.1.0
 - Spring Data JPA
-- Hibernate
-- MySQL
-- H2 (for local validation and testing)
+- Hibernate ORM
+- MySQL 8
+- H2 database for local testing
 - Maven
 - Lombok
+- Spring Security 6
+- JWT (JJWT)
 - SpringDoc OpenAPI
 - Flyway
+- Docker / Docker Compose
 
-## Project Structure
+## Architecture
 
-The application follows a standard Spring Boot package layout:
+The project uses a standard Spring Boot layered structure:
 
-- `com.attendance.attendance_tracker.controller` – REST controllers
-- `com.attendance.attendance_tracker.service` – business logic
-- `com.attendance.attendance_tracker.repository` – persistence logic
-- `com.attendance.attendance_tracker.entity` – JPA entities
-- `com.attendance.attendance_tracker.dto` – request and response DTOs
-- `com.attendance.attendance_tracker.exception` – custom exceptions and global handler
-- `com.attendance.attendance_tracker.config` – app and web configuration
-- `src/main/resources/db/migration` – Flyway migration scripts
+- `controller` – REST endpoints and request handling
+- `service` – business logic and validation
+- `repository` – database persistence logic
+- `entity` – JPA entities
+- `dto` – request/response DTOs
+- `exception` – custom exceptions and exception handler
+- `config` – application, security, and infrastructure settings
+- `security` – JWT and authentication support
 
-## Installation
+## Folder Structure
 
-1. Clone the repository.
-2. Ensure Java 26 is installed and configured.
-3. From the project root, run:
+```text
+attendance-tracker/
+├── src/
+│   ├── main/
+│   │   ├── java/com/attendance/attendance_tracker/
+│   │   │   ├── config/
+│   │   │   ├── controller/
+│   │   │   ├── dto/
+│   │   │   ├── entity/
+│   │   │   ├── exception/
+│   │   │   ├── repository/
+│   │   │   ├── security/
+│   │   │   ├── service/
+│   │   │   └── AttendanceTrackerApplication.java
+│   │   └── resources/
+│   │       ├── application.properties
+│   │       ├── application-dev.properties
+│   │       ├── application-prod.properties
+│   │       └── db/migration/
+│   └── test/
+│       └── java/
+├── Dockerfile
+├── docker-compose.yml
+├── application-example.properties
+├── pom.xml
+├── mvnw
+├── .gitignore
+├── .dockerignore
+├── README.md
+└── LICENSE
+```
+
+## Installation Guide
+
+### Prerequisites
+
+- Java 26
+- Maven 3.9+
+- MySQL 8 (for production deployment)
+- Docker and Docker Compose (optional, recommended for containerized setup)
+
+### Local Setup
+
+1. Clone the repository:
+
+```bash
+git clone <repository-url>
+cd attendance-tracker
+```
+
+2. Build the project:
 
 ```bash
 ./mvnw clean install
 ```
 
-4. Start the app locally:
+3. Run the application:
 
 ```bash
 ./mvnw spring-boot:run
 ```
 
-By default, the application starts on port `8080`.
+The application starts on port `8080` by default.
 
 ## Database Setup
 
-The application is configured to use a default local H2 database for local startup, which makes it easy to run without additional infrastructure.
+### MySQL Setup
 
-For MySQL in a local environment, create a database manually:
+Create the database in MySQL:
 
 ```sql
 CREATE DATABASE student_attendance;
 ```
 
-Then configure the connection using environment variables such as:
+Then configure environment variables or update the example configuration:
 
 ```bash
 export DB_URL=jdbc:mysql://localhost:3306/student_attendance?createDatabaseIfNotExist=true&allowPublicKeyRetrieval=true&serverTimezone=UTC
@@ -86,35 +137,123 @@ export HIBERNATE_DIALECT=org.hibernate.dialect.MySQLDialect
 export FLYWAY_ENABLED=true
 ```
 
+For local quick start, the app also supports an H2 in-memory configuration by default when no database variables are provided.
+
 ## Configuration
 
-The main configuration is managed in `src/main/resources/application.properties`.
+The main Spring Boot configuration is in `src/main/resources/application.properties`.
 
 Key settings include:
 
-- datasource connection configuration
-- JPA and Hibernate configuration
-- Flyway migration configuration
-- OpenAPI / Swagger configuration
-- Actuator endpoints
-- JWT-related settings are present for compatibility, though no auth flow is implemented in this documentation phase
+- datasource configuration
+- Hibernate and JPA configuration
+- Flyway setup
+- JWT secret and TTL
+- server port and actuator exposure
+- Swagger configuration
 
-## API Documentation
+For example values without secrets, see `application-example.properties`.
 
-Swagger UI is available through SpringDoc.
+## Running the Application
 
-Open the following URL in the browser after starting the app:
+### Run Locally with Maven
+
+```bash
+export JAVA_HOME=/path/to/jdk-26
+./mvnw spring-boot:run
+```
+
+### Run with a Custom Profile
+
+```bash
+SPRING_PROFILES_ACTIVE=dev ./mvnw spring-boot:run
+```
+
+## Swagger Documentation
+
+Swagger UI is available once the application is running:
 
 - http://localhost:8080/swagger-ui.html
-- or http://localhost:8080/swagger-ui/index.html
-
-The OpenAPI JSON is available at:
-
+- http://localhost:8080/swagger-ui/index.html
 - http://localhost:8080/v3/api-docs
 
-## Example API Requests
+Swagger includes the REST endpoints for students, teachers, subjects, attendance, reports, and authentication.
 
-### Create a student
+## Authentication Guide
+
+The application uses JWT-based authentication.
+
+### Public Routes
+
+- `/auth/login`
+- `/swagger-ui/**`
+- `/v3/api-docs/**`
+
+### Protected Routes
+
+All other endpoints require a valid JWT token in the `Authorization` header:
+
+```http
+Authorization: Bearer <token>
+```
+
+### Login Example
+
+```http
+POST /auth/login
+Content-Type: application/json
+
+{
+  "email": "admin@attendance.local",
+  "password": "yourPassword"
+}
+```
+
+## API Overview
+
+### Student APIs
+
+- `POST /students`
+- `GET /students`
+- `GET /students/{id}`
+- `PUT /students/{id}`
+- `DELETE /students/{id}`
+- `GET /students/search`
+
+### Teacher APIs
+
+- `POST /teachers`
+- `GET /teachers`
+- `GET /teachers/{id}`
+- `PUT /teachers/{id}`
+- `DELETE /teachers/{id}`
+- `GET /teachers/search`
+
+### Subject APIs
+
+- `POST /subjects`
+- `GET /subjects`
+- `GET /subjects/{id}`
+- `PUT /subjects/{id}`
+- `DELETE /subjects/{id}`
+- `GET /subjects/search`
+
+### Attendance APIs
+
+- `POST /attendance`
+- `GET /attendance`
+- `GET /attendance/{id}`
+- `PUT /attendance/{id}`
+- `DELETE /attendance/{id}`
+- `GET /attendance/student/{studentId}/percentage`
+- `GET /attendance/student/{studentId}/subject/{subjectId}/percentage`
+- `GET /attendance/report/student/{studentId}`
+- `GET /attendance/report/subject/{subjectId}`
+- `GET /attendance/report/date/{date}`
+
+## Sample Requests
+
+### Create Student
 
 ```json
 {
@@ -128,19 +267,7 @@ The OpenAPI JSON is available at:
 }
 ```
 
-### Create a teacher
-
-```json
-{
-  "firstName": "John",
-  "lastName": "Miller",
-  "email": "john@school.com",
-  "password": "Passw0rd!",
-  "specialization": "Mathematics"
-}
-```
-
-### Create a subject
+### Create Subject
 
 ```json
 {
@@ -150,7 +277,7 @@ The OpenAPI JSON is available at:
 }
 ```
 
-### Create attendance
+### Create Attendance
 
 ```json
 {
@@ -161,59 +288,26 @@ The OpenAPI JSON is available at:
 }
 ```
 
-## API Endpoints
+### Login Request
 
-### Student API
-
-- `POST /students`
-- `GET /students`
-- `GET /students/{id}`
-- `PUT /students/{id}`
-- `DELETE /students/{id}`
-- `GET /students/search`
-
-### Teacher API
-
-- `POST /teachers`
-- `GET /teachers`
-- `GET /teachers/{id}`
-- `PUT /teachers/{id}`
-- `DELETE /teachers/{id}`
-- `GET /teachers/search`
-
-### Subject API
-
-- `POST /subjects`
-- `GET /subjects`
-- `GET /subjects/{id}`
-- `PUT /subjects/{id}`
-- `DELETE /subjects/{id}`
-- `GET /subjects/search`
-
-### Attendance API
-
-- `POST /attendance`
-- `GET /attendance`
-- `GET /attendance/{id}`
-- `PUT /attendance/{id}`
-- `DELETE /attendance/{id}`
-- `GET /attendance/student/{studentId}/percentage`
-- `GET /attendance/student/{studentId}/subject/{subjectId}/percentage`
-- `GET /attendance/report/student/{studentId}`
-- `GET /attendance/report/subject/{subjectId}`
-- `GET /attendance/report/date/{date}`
+```json
+{
+  "email": "admin@attendance.local",
+  "password": "yourPassword"
+}
+```
 
 ## Future Improvements
 
-Possible improvements for later phases include:
+Possible future enhancements include:
 
-- Proper authentication and authorization
-- Pagination and sorting on large datasets
-- More advanced reporting filters
+- Pagination and sorting support for larger datasets
+- Advanced analytics dashboards
 - Audit trails and soft delete support
-- Frontend dashboard integration
-- Production-grade security and deployment configuration
+- Email notifications and reminders
+- Frontend integration with a modern UI
+- CI/CD pipeline automation and deployment staging
 
-## Notes
+## License
 
-This project is structured as a clean backend service for academic attendance tracking. The codebase is intended to remain maintainable, testable, and easy to document with standard Spring Boot tooling.
+This project is intended for educational and portfolio use. Add an appropriate license before public production deployment.
